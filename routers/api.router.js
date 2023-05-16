@@ -4,10 +4,19 @@ const user = require('./api/user.router');
 const categories = require('./api/categories.router');
 const subCategories = require('./api/subCategories.router');
 const items = require('./api/items.router');
+const images= require('./api/image.router');
+const cart = require('./api/cart.router');
+const role = require('./api/role.router');
+const rolePermission = require('./api/rolePermission.router');
+const component = require('./api/component.router');
 router.use('/user',user);
 router.use('/categories',categories);
-router.use('/subcategory',subCategories)
+router.use('/subcategory',subCategories);
 router.use('/items',items);
-
+router.use('/images',images);
+router.use('/cart',cart);
+router.use('/role',role);
+router.use('/rolePermission',rolePermission);
+router.use('/component',component);
 
 module.exports= router;

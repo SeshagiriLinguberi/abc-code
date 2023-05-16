@@ -305,3 +305,63 @@ console.log("entered");
         }
     })
 }
+
+exports.getAllItemsByGroup = async (req,res)=>{
+
+    let sql = `SELECT items.item_id,items.category_type_id,items.item_name,items.category_type_id,items.item_created_datetime,items.item_updated_datetime,sub_category.category_type_name,categories.category_id
+     FROM sub_category,categories,items
+    
+     WHERE categories.category_id = sub_category.category_id
+    
+     OR sub_category.category_type_id = items.category_type_id 
+
+     GROUP BY sub_category.category_type_id, categories.category_id`;
+    conn.query(sql,(err,data)=>{
+        if(err){
+            res.status(500).json({
+                statusCode:500,
+                status:false,
+                error:true,
+                message:err
+            })
+        }
+        else 
+        {
+            //console.log(data);
+            let result = {};
+            let ex;
+            let finalresult =  data.map(obj => {
+            const { category_id,category_type_id,category_type_name, ...rest } = obj;
+            if (!result[category_type_id]) 
+            {
+                ex=[{category_id,category_type_id,category_type_name, types: [] }];
+                     ex[0].category_type_id=(category_type_id);
+                     ex[0].category_type_name=(category_type_name);
+                     ex[0].category_id=(category_id);
+            }
+            console.log("ex:::",ex[0]);
+            ex[0].types.push(rest);
+            console.log(ex);
+            return ex[0];
+        });
+            const result2 = Object.values(finalresult.reduce((acc, { category_type_id,category_id, types }) => {
+           if (!acc[category_type_id]) 
+          {
+            
+                acc[category_type_id] = { category_type_id,category_id, types: [] };
+          }
+                acc[category_type_id].types = acc[category_type_id].types.concat(types);
+                acc[category_type_id].category_id = category_id;
+                return acc;
+         }, {}));
+         
+                res.status(200).json({
+                statusCode:200,
+                status:true,
+                error:false,
+                responseData:result2
+            })
+        }
+    })
+}
+

@@ -15,8 +15,6 @@ router.post('/delete/sub_category/by/id',subController.deleteSubCategoryById);
 
 router.get('/get/all/items',subController.getAllItems);
 
-
-
-
+router.get('/get/all/items/by/group',subController.getAllItemsByGroup);
 
 module.exports = router;   

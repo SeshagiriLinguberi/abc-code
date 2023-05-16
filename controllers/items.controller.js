@@ -42,12 +42,15 @@ exports.addItems = async (req, res) => {
             if(result.length==0)
             {
                 console.log(result);
-                        const sql1 = `INSERT INTO items (item_name,category_type_id,category_id,item_created_datetime) VALUES (?)`;
+                        const sql1 = `INSERT INTO items (item_name,category_type_id,category_id,item_created_datetime,item_inline_data,item_quantity,item_price) VALUES (?)`;
                         let values = [
                                 req.body.item_name,
                                 req.body.category_type_id,
                                 req.body.category_id,
-                                new Date()
+                                new Date(),
+                                req.body.item_inline_data,
+                                req.body.item_quantity,
+                                req.body.item_price
                                     ]
                             conn.query(sql1, [values], async(err, data) => {
                             if (err)
