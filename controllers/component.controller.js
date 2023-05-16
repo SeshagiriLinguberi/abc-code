@@ -1,10 +1,10 @@
 const conn =  require('../config/dbconfig');
 
 module.exports.addComponent = async(req,res)=>{
-    const sql = `CALL insert_components()`;
+    const sql = `CALL insert_components(?)`;
     const values = [
         req.body.component_name,
-        Date.now()
+        new Date()
     ]
     conn.query(sql,[values],async(err,data)=>{
         if(err){

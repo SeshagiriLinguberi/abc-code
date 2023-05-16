@@ -34,7 +34,7 @@ exports.verifyJWT=async(req,res,next)=> {
           }
     }
 
-    console.log(data,"@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
+    console.log(data);
   } 
   catch (error) 
   {
