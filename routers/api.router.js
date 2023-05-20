@@ -9,6 +9,7 @@ const cart = require('./api/cart.router');
 const role = require('./api/role.router');
 const rolePermission = require('./api/rolePermission.router');
 const component = require('./api/component.router');
+const roleComponentMapping = require('./api/roleComponenetMapping.router');
 router.use('/user',user);
 router.use('/categories',categories);
 router.use('/subcategory',subCategories);
@@ -18,5 +19,5 @@ router.use('/cart',cart);
 router.use('/role',role);
 router.use('/rolePermission',rolePermission);
 router.use('/component',component);
-
+router.use('/roleComponentMapping',roleComponentMapping);
 module.exports= router;

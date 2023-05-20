@@ -1,9 +1,7 @@
 const jwt = require('jsonwebtoken');
-//const userController = require('../controllers/user.controller');
 exports.verifyJWT=async(req,res,next)=> {
   try 
   {
-    //const token = req.req.headers.Authorization;
     let token = req.headers['authorization']
     console.log(token.length);
     if(token==null){
@@ -14,7 +12,6 @@ exports.verifyJWT=async(req,res,next)=> {
         msg:"null tokens not valid please enter details"
       })
     }
-    
     else if(token.length !=0)
     {
       const data = jwt.verify(token,"secretkey");
@@ -41,7 +38,5 @@ exports.verifyJWT=async(req,res,next)=> {
      console.log(error.message);
     return null; 
   }
-
-
 }
 

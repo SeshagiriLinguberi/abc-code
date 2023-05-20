@@ -1,6 +1,7 @@
 const { checkType } = require('parser');
 const conn = require('../config/dbconfig');
 const fs = require('fs');
+const { log } = require('console');
 exports.getAllCategories = async (req,res)=>{
     let sql = `SELECT* FROM categories WHERE log_state=1`;
     conn.query(sql,(err,data)=>{
@@ -367,9 +368,9 @@ exports.getAllSubCategoriesBYGroup = async (req,res)=>{
 exports.getAllCategoriesSubcategoriesItemsByGroup = async (req,res)=>{
     let sql = `SELECT categories.category_id,sub_category.category_type_id,items.item_id,items.item_name,items.item_created_datetime,items.item_updated_datetime,sub_category.category_type_name,items.category_type_id
     FROM categories,sub_category,items
-    WHERE categories.category_id = sub_category.category_id OR 
+    WHERE categories.category_id = sub_category.category_id AND 
     sub_category.category_type_id=items.category_type_id
-    GROUP BY categories.category_id,sub_category.category_type_id,items.category_type_id`;
+    GROUP BY categories.category_id,sub_category.category_type_id,items.item_id`;
 
     conn.query(sql,async(err,data)=>{
         if(err)
@@ -383,9 +384,18 @@ exports.getAllCategoriesSubcategoriesItemsByGroup = async (req,res)=>{
         }
         else
         {
-            //console.log(data);
+            console.log(data);
             let result = {};
             let ex;
+            // -----------------------------------------------------------
+            // let itemOfArray=[]
+            // data.forEach(element => {
+            //     if(element.item_id){
+            //         itemOfArray.push(item_id)
+            //     }
+            //     ;
+            // });
+            // -----------------------------------------------------------
             let finalresult =  data.map(obj => {
             const { category_id,category_type_id,item_id,category_type_name, ...rest } = obj;
            //console.log(!result[category_id],"result>>>>>>>>>>....");

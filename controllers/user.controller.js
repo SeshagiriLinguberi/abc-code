@@ -4,10 +4,11 @@ const nodemailer = require('nodemailer');
 const otpGenerator = require('generate-otp');
 const readline = require('readline');
 const bcrypt = require('bcrypt');
+const validations = require('../utils/validations');
 
 exports.getAllUsers = async (req,res)=>{
     //let sql = `SELECT* FROM users WHERE log_state=1`;
-    let sql =`CALL get_user_details()`;
+    let sql =`CALL user_get_details()`;
     conn.query(sql,(err,data)=>{
         if(err){
             res.status(500).json({
@@ -71,7 +72,7 @@ exports.insertData = async (req, res) => {
                        console.log("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@",myPlaintextPassword);
 
                        // const sql1 = `INSERT INTO users (user_name,first_name,last_name,full_name,date_of_birth,phone_number,email_id,password,created_datetime) VALUES (?)`;
-                            const sql1 = `CALL insert_user_details (?)`;
+                            const sql1 = `CALL user_insert_details (?)`;
                         let values = [
                                 req.body.user_name,
                                 req.body.first_name,
@@ -417,29 +418,13 @@ exports.updateUser = async (req,res)=>{
 
 };
 
+exports.userLogin= async (req,res)=>{  
 
-async function userValidationCheck (req,res){
-  
-    let sql = `select * from users where email_id = '${req.body.email_id}'`
-     await conn.query(sql,async(err,result)=>{
-         if(err){
-           
-        }else{
-            console.log("result::",result);
-            d1 = result
-        //    return result
-        }
-    }
-    )
-    return d1
-   
-}
-exports.userLogin= async (req,res)=>{   
-    const email = req.body.email_id;
     const candidatePassword = req.body.password;
+    const sql  =`Call user_get_details_by_emailId(?)`;
+    const values =[req.body.email_id];
 
-    let sql = `SELECT* FROM users WHERE email_id='${email}'`
-    conn.query(sql,async(err,data)=>{
+    conn.query(sql,[values],async(err,data)=>{
         if(err)
         {
             res.status(500).json({
@@ -451,7 +436,7 @@ exports.userLogin= async (req,res)=>{
         }
         else
         {
-            console.log(data[0]);
+            console.log(data.length,"length");
             if(data.length==0)
             {
                 res.status(401).json({
@@ -463,90 +448,45 @@ exports.userLogin= async (req,res)=>{
             }
             else
             {
-                const match =await bcrypt.compare(candidatePassword,data[0].password);
-                console.log(match);
+                const match =await bcrypt.compare(candidatePassword,data[0][0].password);
+                console.log("match:::",match);
                 if(match)
                 {
                     let token = jsonwebToken.sign({userdata:data},"secretkey");
-                    console.log(token);
-                    data[0].token=token;
-                    
-                    let sql1;
+                    data[0][0].token=token;
                     let values = [
-                        req.body.email_id                     
-                       ]
-                        sql1=`INSERT INTO user_login_table (email_id,token,login_at_datetime) VALUES(?,token,NOW()) ON DUPLICATE KEY UPDATE  login_at_datetime =  NOW(),token='${token}'`;
-                    conn.query(sql1,[values],(err,data1)=>{
-                     if(err)
-                     {
-                         res.status(500).json({
-                             statusCode:500,
-                             status:true,
-                             error:false,
-                             message:err
-                         })
-                     }
-                     else
-                     {
-                       // let result2;
-                        //console.log(data[0]);
-                        const sql2 = `SELECT user_role_permissions.user_id,user_role_permissions.role_id,roles.role_name,roles.role_name,roles.created_datetime,roles.updated_datetime
-                        FROM user_role_permissions
-                        INNER JOIN roles
-                        ON user_role_permissions.role_id = roles.role_id
-                        WHERE user_id = '${data[0].user_id}'
-                        GROUP BY user_role_permissions.user_id,user_role_permissions.role_id`;
-
-                        conn.query(sql2,async(err,data2)=>{
-                        if(err){
-                            res.status(500).json({
-                                statusCode:500,
-                                status:false,
-                                error:true,
-                                msg:err
-                            });
-                        }
-                        else{
-                            let result = {};
-                            let ex;
-                            let finalresult =  data2.map(obj => {
-                                    const { user_id, ...rest } = obj;
-                                    if (!result[user_id]) 
-                                     {
-                                           ex=[{user_id, types: [] }];
-                                           ex[0].user_id=(user_id);
-                                     }
-                           // console.log("ex:::",ex[0]);
-                            ex[0].types.push(rest);
-                            console.log(ex);
-                            return ex[0];
-                        });
-                            const result2 = Object.values(finalresult.reduce((acc, { user_id, types }) => {
-                           if (!acc[user_id]) 
+                        req.body.email_id,
+                        token,
+                         new Date()
+                       ];
+                       const sql1 = `Call user_login_into_userLoginTable(?)`;
+                        conn.query(sql1,[values],async(err,data1)=>{
+                            if(err)
                             {
-                            
-                                acc[user_id] = {types: [] };
+                                res.status(500).json({
+                                    statusCode:500,
+                                    status:true,
+                                    error:false,
+                                    message:err
+                                })
                             }
-                                acc[user_id].types = acc[user_id].types.concat(types);
-                                //acc[user_id].user_id = user_id;
-                                return acc;
-                         }, {}));
-                         console.log(result2[0].types);
-                         data[0].roleInformation=result2[0].types;
-
-                            res.status(200).json({
-                                statusCode:200,
-                                status:true,
-                                error:false,
-                                responseData:data[0]
-                            })
-                            //console.log(finalresult);
-                            
-                        }
+                            else
+                            {
+                                const values = data[0][0].user_id;
+                                console.log("user _id ",values); 
+                                const componentInfo=  await validations.componentInfo(values);
+                                const roleInfo = await validations.roleInfo(values);
+                                data[0][0].roleInfo=roleInfo;
+                                data[0][0].componentInfo=componentInfo;
+                                
+                                      res.status(200).json({
+                                       statusCode:200,
+                                       status:true,
+                                       error:false,
+                                       responseData:data[0]
+                                   })
+                            }
                     })
-                     }
-                    })
-                    
                 }
                 else
                 {
@@ -768,7 +708,7 @@ exports.changePassword = async(req,res)=>{
                                             const saltRounds=10;
                                             const salt= await bcrypt.genSalt(saltRounds);
                                             newPassword=await bcrypt.hash(newPassword,salt);
-                                            const sql3 = `UPDATE users SET password= '${newPassword}' WHERE email_id='${req.body.email_id}'`;
+                                            const sql3 = `UPDATE users SET password= '${newPassword}'WHERE email_id='${req.body.email_id}'`;
                     
                                             conn.query(sql3,async (err,data3)=>{
                                                 if(err)

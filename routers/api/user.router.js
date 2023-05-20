@@ -21,6 +21,5 @@ router.post('/user/forget/password',controller.forgetPassword);
 router.post('/user/change/password',controller.changePassword);
 
 router.post('/user/forget/password2',controller.forgetPassword2);
-//router.post('/user/chk',controller.userValidationCheck);
 
 module.exports = router;    
