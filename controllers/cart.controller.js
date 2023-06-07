@@ -29,7 +29,7 @@ exports.addToCart = async(req,res)=>{
                             if(data.length!=0)
                             {
                                 
-                                const sql2  = `INSERT INTO cart (category_id,category_type_id,item_id,item_quantity,item_price,total_price,user_id,created_datetime) VALUES(?)`;
+                                const sql2  = `INSERT INTO cart (category_id,category_type_id,item_id,item_quantity,item_price,total_price,user_id,created_datetime,item_size) VALUES(?)`;
                                 const values= [
                                                 data[0].category_id,
                                                 data[0].category_type_id,
@@ -38,7 +38,8 @@ exports.addToCart = async(req,res)=>{
                                                 req.body.item_price,
                                                 req.body.item_quantity*req.body.item_price,
                                                 req.body.user_id,
-                                                new Date()
+                                                new Date(),
+                                                req.body.item_size
                                               ];
                                  conn.query(sql2,[values],async(err,data1)=>{
                                         if(err)
@@ -305,8 +306,8 @@ exports.deleteCartItem = async (req,res)=>{
 }
 
 exports.getCartItem = async (req,res)=>{
-    let sql3=`SELECT * FROM users WHERE user_id='${req.body.user_id}' AND log_state=1`;
-    conn.query(sql3,async(err,data3)=>{
+    let sql=`SELECT * FROM users WHERE user_id='${req.body.user_id}' AND log_state=1`;
+    conn.query(sql,async(err,data)=>{
         if(err){
             res.status(500).json({
                 statusCode:500,
@@ -316,10 +317,11 @@ exports.getCartItem = async (req,res)=>{
             });
         }
         else{
-            if(data3.length!=0)
+            console.log();
+            if(data.length!=0)
             {
-                const sql = `SELECT * FROM cart WHERE user_id = '${req.body.user_id}'AND log_state=1`;
-                conn.query(sql,async(err,data)=>{
+                const sql2 = `SELECT * FROM cart WHERE user_id = '${req.body.user_id}'AND log_state=1`;
+                conn.query(sql2,async(err,data2)=>{
                     if(err){
                         res.status(500).json({
                             statusCode:500,
@@ -329,14 +331,14 @@ exports.getCartItem = async (req,res)=>{
                         });
                     }
                     else{
-                        console.log(data.length);
-                            if(data.length!=0)
+                        console.log(data2.length);
+                            if(data2.length!=0)
                             {
                                 res.status(200).json({
                                     statusCode:200,
                                     status:true,
                                     error:true,
-                                    responseData:data
+                                    responseData:data2
                                 })
                             }
                             else{

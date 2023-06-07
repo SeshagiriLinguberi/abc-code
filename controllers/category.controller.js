@@ -1,9 +1,7 @@
-const { checkType } = require('parser');
 const conn = require('../config/dbconfig');
 const fs = require('fs');
-const { log } = require('console');
 exports.getAllCategories = async (req,res)=>{
-    let sql = `SELECT* FROM categories WHERE log_state=1`;
+    let sql = `Call categories_get_all_categories`;
     conn.query(sql,(err,data)=>{
         if(err){
             res.status(500).json({
@@ -13,23 +11,22 @@ exports.getAllCategories = async (req,res)=>{
                 message:err
             })
         }
-        else 
-        {
+        else {
             res.status(200).json({
                 statusCode:200,
                 status:true,
                 error:false,
-                responseData:data
+                responseData:data[0]
             })
         }
     })
 }
 exports.insertData = async (req, res) => {
-    let sql = `select * from categories where category_name = '${req.body.category_name}'`
-    await conn.query(sql,async(err,result)=>{
-        console.log(result);
-        if(err)
-        {
+    let category_id = Math.floor(Math.random() * 1000) + 1000;
+    const sql = `Call categories_insert_catagories(?)`;
+    let values = [ category_id , req.body.category_name ,new Date(), req.body.image];
+    conn.query(sql,[values],async(err,data)=>{
+        if(err){
             res.status(500).json(
                 {
                      statusCode:500,
@@ -38,71 +35,34 @@ exports.insertData = async (req, res) => {
                      message:err
                  });
         }
-        else
-        {
-            if(result.length==0)
-            {
-                    let token = Math.floor(Math.random() * 1000) + 1000;
-                        const sql1 = `INSERT INTO categories (category_id,category_name,created_datetime,image) VALUES (?)`;
-                        let values = [
-                                token,
-                                req.body.category_name,
-                                new Date(),
-                                req.body.image
-                                    ]
-                            conn.query(sql1, [values], async(err, data) => {
-                            if (err)
-                            {
-                                        res.status(500).json(
-                                        {
-                                             statusCode:500,
-                                             status:false,
-                                             error:true,
-                                             message:err
-                                         });
-                            } 
-                            else 
-                            {
-                                let sql2 = `SELECT * FROM categories WHERE log_state=1`;
-                                await conn.query(sql2,(err,result)=>{
-                                if(err)
-                                {
-                                    res.status(500).json(
-                                        {
-                                             statusCode:500,
-                                             status:false,
-                                             error:true,
-                                             message:err
-                                         });
-                                }
-                                else{
-                                     res.status(200).json({
-                                     statusCode:200,
-                                     status:true,
-                                     error:false,
-                                     responseData:result
-                                    });
-                                }
-                                });
-                                   }
-                               })
-                   
+        else{
+            console.log(data[0]);
+            console.log(data[0][0].image)
+            if(data[0].length==0){
+                res.status(200).json({
+                    statusCode:200,
+                    status:true,
+                    error:false,
+                    responseData:data[0]
+                   });
+            }else{
+                res.status(401).json({
+                    statusCode:401,
+                    status:false,
+                    error:true,
+                    message:"Category already exists"
+                   });
             }
-            else{
-                res.status(401).json(
-                     {
-                          statusCode:401,
-                          status:true,
-                          error:false,
-                          message:"category  already exist"
-                      });
-             }                      
-
-          }
-       })
+           
+        }
+    })
+                              
    }
 exports.getCategoryById = async (req,res)=>{
-    conn.query(`SELECT * FROM categories WHERE category_id = '${req.body.category_id}' AND log_state=1`,(err,data)=>{
+    const sql = `Call categories_get_details_by_id(?)`;
+    const flag=1;
+    const values = [req.body.category_id,flag];
+    conn.query(sql,[values],async(err,data)=>{
         if(err){
             res.status(500).json({
                 statusCode:500,
@@ -111,102 +71,60 @@ exports.getCategoryById = async (req,res)=>{
                 message:err
             })
         }
-        else
-        {
-           if(data.length!=0)
-           {
-                let userid = req.body.user_id;
-                let sql = `SELECT * FROM categories WHERE log_state=1 AND category_id = '${req.body.category_id}'`;
-                conn.query(sql,userid,(err,data)=>{
-                    if(err){
-                        res.status(500).json({
-                            statusCode:500,
-                            status:false,
-                            error:true,
-                            message:err
-                        });
-                    }
-                    else
-                    {
-                        res.status(200).json({
-                            statusCode:200,
-                            status:true,
-                            error:false,
-                            responseData:data,
-                        })
-                    }
-                })
-           
-           }
-           else
-           {
-               res.status(500).json({
-                   statusCode:500,
-                   status:false,
-                   error:true,
-                   message:"no users found"
-               })
-           }
+        else{
+                console.log(data[0]);
+                if(data[0].length!=0){
+                    res.status(200).json({
+                        statusCode:200,
+                        status:true,
+                        error:false,
+                        responseData:data[0]
+                    })
+                }else{
+                    res.status(401).json({
+                        statusCode:401,
+                        status:false,
+                        error:true,
+                        message:"no categories found "
+                    })
+                }
         }
     })
-   
-  
 }
 
 exports.deleteCategoryById = async (req,res)=>{
-    conn.query(`SELECT * FROM categories WHERE category_id = '${req.body.category_id}' AND log_state=1`,(err,data)=>{
+    const sql = 'Call categories_get_details_by_id(?)';
+    const flag=2;
+    const values = [req.body.category_id,flag];
+    conn.query(sql,[values],(err,data)=>{
         if(err){
             res.status(500).json({
                 statusCode:500,
                 status:false,
                 error:true,
                 message:err
-            })
+            });
         }
-        else
-        {
-            if(data.length!=0)
-            {
-                    let sql = `UPDATE categories SET log_state = 3  WHERE category_id = '${ req.body.category_id}'  AND log_state=1`
-                    conn.query(sql,(err,data)=>{
-                        if(err){
-                            res.status(500).json({
-                                statusCode:500,
-                                status:false,
-                                error:true,
-                                message:err
-                            });
-                        }
-                        else{
-                       
-                            let sql1 = `SELECT * FROM categories WHERE log_state=1`;
-                            conn.query(sql1,(err,result)=>{
-                                if(err){
-                                    throw err;
-                                }
-                                else{
-                                    res.status(200).json({
-                                        statusCode:200,
-                                        status:true,
-                                        error:false,
-                                        responseData:result
-                                    });
-                                }
-                            });
-                        }
-                    })
-                }
-                else
-                {
-                    res.status(500).json({
-                        statusCode:500,
-                        status:false,
-                        error:true,
-                        message:"no categories found"
-                    })
-                }
+        else{
+            if(data[0].length!=0){
+                res.status(200).json({
+                    statusCode:200,
+                    status:true,
+                    error:false,
+                    responseData:data[0]
+                });
+            }
+            else{
+                res.status(401).json({
+                    statusCode:400,
+                    status:false,
+                    error:true,
+                    message:"no categories found"
+                });
+            }
+            
         }
-    })
+    })             
 }
 exports.updateCategoryById = async (req,res)=>{
     conn.query(`SELECT * FROM categories WHERE category_id = '${req.body.category_id}'  AND log_state=1`,(err,data)=>{
@@ -225,12 +143,11 @@ exports.updateCategoryById = async (req,res)=>{
             {
                
                 let sql = `UPDATE categories SET category_name = ?,updated_datetime = ? WHERE category_id = ?`;
-                
                 let values = [
                     req.body.category_name,
                     new Date(),
                     req.body.category_id
-                ]
+                ];
                 conn.query(sql,values,(err,data)=>{
                     if(err){
                         res.status(500).json({
@@ -276,8 +193,6 @@ exports.updateCategoryById = async (req,res)=>{
             
         }
     })
- 
-
 };
 
 exports.getAllSubCategories = async (req,res)=>{
@@ -311,9 +226,6 @@ exports.getAllSubCategoriesBYGroup = async (req,res)=>{
      INNER JOIN sub_category 
      ON categories.category_id = sub_category.category_id
     GROUP BY categories.category_id,sub_category.category_type_name`;
-//     SELECT Shippers.ShipperName, COUNT(Orders.OrderID) AS NumberOfOrders FROM Orders
-// LEFT JOIN Shippers ON Orders.ShipperID = Shippers.ShipperID
-// GROUP BY ShipperName;
     conn.query(sql,(err,data)=>{
         if(err){
             res.status(500).json({
@@ -325,27 +237,17 @@ exports.getAllSubCategoriesBYGroup = async (req,res)=>{
         }
         else 
         {
-            //console.log(data);
             let result = {};
             let ex;
             let finalresult =  data.map(obj => {
             const { category_id, ...rest } = obj;
-            
-            //console.log(!result[category_id]);
-            if (!result[category_id]) 
-            {
+            if (!result[category_id]){
                 ex=[{category_id, types: [] }];
-
-                console.log(category_id,">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
-                     ex[0].category_id=(category_id);
-                   
+                ex[0].category_id=(category_id);
             }
-            console.log("ex:::",ex[0]);
             ex[0].types.push(rest);
-            console.log(ex);
             return ex[0];
             });
-        console.log(finalresult);
           
           const result2 = Object.values(finalresult.reduce((acc, { category_id, types }) => {
             if (!acc[category_id]) {
@@ -366,12 +268,7 @@ exports.getAllSubCategoriesBYGroup = async (req,res)=>{
     })
 }
 exports.getAllCategoriesSubcategoriesItemsByGroup = async (req,res)=>{
-    let sql = `SELECT categories.category_id,sub_category.category_type_id,items.item_id,items.item_name,items.item_created_datetime,items.item_updated_datetime,sub_category.category_type_name,items.category_type_id
-    FROM categories,sub_category,items
-    WHERE categories.category_id = sub_category.category_id AND 
-    sub_category.category_type_id=items.category_type_id
-    GROUP BY categories.category_id,sub_category.category_type_id,items.item_id`;
-
+    const sql = `Call category_get_all_subcategories_and_items_based_on_category_id`;
     conn.query(sql,async(err,data)=>{
         if(err)
         {
@@ -384,70 +281,48 @@ exports.getAllCategoriesSubcategoriesItemsByGroup = async (req,res)=>{
         }
         else
         {
-            console.log(data);
-            let result = {};
-            let ex;
-            // -----------------------------------------------------------
-            // let itemOfArray=[]
-            // data.forEach(element => {
-            //     if(element.item_id){
-            //         itemOfArray.push(item_id)
-            //     }
-            //     ;
-            // });
-            // -----------------------------------------------------------
-            let finalresult =  data.map(obj => {
-            const { category_id,category_type_id,item_id,category_type_name, ...rest } = obj;
-           //console.log(!result[category_id],"result>>>>>>>>>>....");
-           //console.log(category_id);
-            if (!result[category_id]) 
-            {
-                //console.log([category_type_id],"<<<<<<<<<<>>>>>>>>>>>>>>>");
-                ex=[{category_id, types1: [{category_type_id,category_type_name,types2:[{item_id,types3:[]}]}] }];
-            
-                //console.log(category_id,">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
-                     ex[0].category_id=(category_id);
-                     ex[0].types1[0].category_type_id=category_type_id;
-                     ex[0].types1[0].category_type_name=category_type_name;
-                     ex[0].types1[0].types2[0].item_id=item_id;
-            }
-            //console.log("ex:::",ex[0]);
-            ex[0].types1[0].types2[0].types3.push(rest);
-            //console.log(ex);
-            return ex[0];
-            });
-            //console.log(finalresult);
-            //=------------------------------------------------------------------------
-            const result2 = Object.values(finalresult.reduce((acc, {category_id, types1}) => {
-             if (!acc[category_id]) 
-             {
-              //console.log(!acc[category_id],"gggg");
-               acc[category_id] = { category_id, types1: [] };
-             }
-             acc[category_id].types1 = acc[category_id].types1.concat(types1);
-             return acc;
-            }, {}));
-            //-------------------------------------------------------------------
-            // const result3 = Object.values(result2.reduce((acc, {category_id,category_type_id,types1, types2}) => {
-            //     if (!acc[types1.category_type_id]) 
-            //     {
-            //      //console.log(!acc[category_id],"gggg");
-            //       acc[category_type_id] = [{category_id, types1: [{category_type_id,types2:[]}] }];
+            const result = [];
+            const groupedData = {};
 
-            //     }
-            //     acc[category_type_id].types2 = acc[category_type_id].types2.concat(types2);
-            //     return acc;
-            //    }, {}));
-            //    console.log(result3);
-               console.log(result2);
-            //console.log(result);
-
-            //console.log(finalresult);
+            data[0].forEach((item) => {
+                if (!groupedData[item.category_id]) {
+                       groupedData[item.category_id] = {
+                       category_id: item.category_id,
+                       category_name:item.category_name,
+                       type: []
+                       };
+                   }
+               let type = groupedData[item.category_id].type.find(
+                    (t) => t.category_type_id === item.category_type_id
+                   );
+       
+                   if (!type) {
+                       type = {
+                         category_type_id: item.category_type_id,
+                         category_name:item.subcategory,
+                         types: []
+                       };
+                       groupedData[item.category_id].type.push(type);
+                     }
+                       type.types.push({
+                       item_id: item.item_id,
+                       item_name: item.item_name
+                   });
+       
+               });
+       
+               for (const key in groupedData) 
+               {
+                   if (Object.prototype.hasOwnProperty.call(groupedData, key)) 
+                   {
+                       result.push(groupedData[key]);
+                   }
+               }
             res.status(200).json({
                 statusCode:200,
                 status:true,
                 error:false,
-                responseData:result2
+                responseData:result
             })
         }
     })
@@ -499,6 +374,59 @@ exports.downloadImage = async (req,res) =>{
                 status:true,
                 error:false,
                 responseData:data1[0].image.data
+            })
+        }
+    })
+}
+module.exports.getAllCategoriesSubcategoriesItemsInSingleObject = async(req,res)=>{
+    const sql = `Call category_get_all_subcategories_and_items_based_on_category_id`;
+    conn.query(sql,async(err,data)=>{
+        if(err){
+            throw err.message;
+        }
+        else{
+        const result = [];
+        const groupedData = {}
+
+        data[0].forEach((item) => {
+         if (!groupedData[item.category_id]) {
+                groupedData[item.category_id] = {
+                category_id: item.category_id,
+                category_name:item.category_name,
+                type: []
+                };
+            }
+        let type = groupedData[item.category_id].type.find(
+             (t) => t.category_type_id === item.category_type_id
+            );
+
+            if (!type) {
+                type = {
+                  category_type_id: item.category_type_id,
+                  category_name:item.subcategory,
+                  types: []
+                };
+                groupedData[item.category_id].type.push(type);
+              }
+                type.types.push({
+                item_id: item.item_id,
+                item_name: item.item_name
+            });
+
+        });
+
+        for (const key in groupedData) 
+        {
+            if (Object.prototype.hasOwnProperty.call(groupedData, key)) 
+            {
+                result.push(groupedData[key]);
+            }
+        }
+            res.status(200).json({
+                statusCode:200,
+                status:true,
+                error:false,
+                responseData:result
             })
         }
     })

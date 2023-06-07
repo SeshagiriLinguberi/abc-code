@@ -1,6 +1,5 @@
 const exp = require('constants');
 const express = require('express');
-
 const app = express();
 const bodyParse  = require('body-parser');
 const cors = require('cors');

@@ -17,6 +17,8 @@ router.get('/get/all/sub_categories',controller.getAllSubCategories);
 router.get('/get/all/sub_categories/by/group',controller.getAllSubCategoriesBYGroup);
 
 router.get('/get/all/categories/sub_categories/items/by/group',controller.getAllCategoriesSubcategoriesItemsByGroup);
+
+router.get('/get/all/categories/sub_categories/items/in/single/object',controller.getAllCategoriesSubcategoriesItemsInSingleObject);
 router.post('/upload/image',controller.uploadImage);
 router.get('/download/image',controller.downloadImage);
 module.exports = router;   

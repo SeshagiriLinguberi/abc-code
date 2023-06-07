@@ -23,7 +23,7 @@ exports.getAllItems = async (req,res)=>{
     })
 }
 
-exports.addItems = async (req, res) => {
+exports.addItem = async (req, res) => {
     let sql = `select * from items where item_name = '${req.body.item_name}'`;
     await conn.query(sql,async(err,result)=>{
         console.log(result);

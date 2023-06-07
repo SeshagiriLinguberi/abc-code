@@ -1,7 +1,7 @@
 const express = require('express');
 const router  = express.Router();
 const itemsController = require('../../controllers/items.controller');
-const validate = require('../../utils/common_utils')
+const validate = require('../../utils/validations')
 
 router.get('/get/all/items',itemsController.getAllItems);
 
@@ -9,7 +9,7 @@ router.get('/get/all/items',itemsController.getAllItems);
 
  router.post('/update/item/by/id',validate.verifyJWT,itemsController.updateItmesById);
 
- router.post('/add/all/items',itemsController.addItems);
+ router.post('/add/item',itemsController.addItem);
 
 router.post('/delete/item/by/id',itemsController.deleteItemsById);
 
