@@ -5,7 +5,7 @@ const jwt = require('jsonwebtoken');
 module.exports.verifyJWT=async(req,res,next)=> {
   try 
   {
-    let token = req.headers['authorization']
+    let token = req.headers['authorization'];
     console.log("TOKEN LENGTH:::",token.length);
     if(token.length==0){
       res.status(403).json({
@@ -16,7 +16,7 @@ module.exports.verifyJWT=async(req,res,next)=> {
       })
     }else if(token.length!=0)
     {
-      const data =await jwt.verify(token,"secretkey");
+      const data =jwt.verify(token, "secretkey");
           console.log("data::::",data);
           if(data.length!=0)
           {

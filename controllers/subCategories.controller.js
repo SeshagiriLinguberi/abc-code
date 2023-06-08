@@ -151,8 +151,9 @@ exports.getAllItems = async (req,res)=>{
 }
 
 exports.getAllItemsByGroup = async (req,res)=>{
-     const sql = `Call sub_category_get_all_sub_categories_and_items`;
-    conn.query(sql,(err,data)=>{
+     const sql = `Call sub_category_get_all_sub_categories_and_items(?)`;
+     const flag=2;
+    conn.query(sql,[flag],(err,data)=>{
         if(err){
             res.status(500).json({
                 statusCode:500,

@@ -382,7 +382,12 @@ module.exports.getAllCategoriesSubcategoriesItemsInSingleObject = async(req,res)
     const sql = `Call category_get_all_subcategories_and_items_based_on_category_id`;
     conn.query(sql,async(err,data)=>{
         if(err){
-            throw err.message;
+            res.status(500).json({
+                statusCode:500,
+                status:false,
+                error:true,
+                message:err
+            })
         }
         else{
         const result = [];

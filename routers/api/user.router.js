@@ -1,6 +1,6 @@
 const express = require('express');
 const router  = express.Router();
-const validate = require('../../utils/validations')
+const validate = require('../../utils/validations');
 const controller = require('../../controllers/user.controller');
 
 router.get('/get/all/users',controller.getAllUsers);

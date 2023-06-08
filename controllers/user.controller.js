@@ -268,7 +268,8 @@ module.exports.userLogin= async (req,res)=>{
                                             })
                                         } 
                                         else {
-                                            console.log("data:::",data.length)
+                                            console.log("data:::",data.length);
+
                                           let result = {};
                                           let output1;
                                           let finalresult2 =  data[0].map(obj => {
@@ -283,16 +284,19 @@ module.exports.userLogin= async (req,res)=>{
                                           output1[0].types.push(rest);
                                           return output1[0];
                                       });
+                                      console.log("fiinal result2:::",finalresult2);
                                       const result3 = Object.values(finalresult2.reduce((acc, { role_id,role_name, types }) =>{
                                           if (!acc[role_id]) 
                                             {
                                                acc[role_id] = {role_id,role_name,types: [] };
-                                           }
+                                               console.log("acc:::",acc)
+                                            }
                                                acc[role_id].types = acc[role_id].types.concat(types);
                                                
                                                return acc;
                                         }, {}));
                                           output = result3;
+                                          console.log("result3:::",result3)
                                           resolve(output);
                                         }
                                       });
